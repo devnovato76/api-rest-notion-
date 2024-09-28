@@ -1,4 +1,5 @@
 import {request, response}  from 'express';
+import Usuario from '../models/users.models.js'
 
 
 const usersGet = (req = request, resp = response) => {
@@ -11,13 +12,16 @@ const usersGet = (req = request, resp = response) => {
     apikey
   });
 };
-const usersPost = (req = request, resp = response) => {
+const usersPost = async(req = request, resp = response) => {
 
-  const { nombre, edad } = req.body;
+  const body = req.body;
+  const usuario = new Usuario(body);
+  await usuario.save();
+
+  await usuario.save();
   resp.json({
     msg: "post  API",
-    nombre,
-    edad,
+    usuario
   });
 };
 const usersPut = (req = request, resp = response) => {

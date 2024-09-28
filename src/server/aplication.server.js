@@ -3,6 +3,7 @@ import express, { response } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import router from "../routes/users.routes.js";
+import { dbConnection } from "../database/config.js";
 
 export class Aplication {
   constructor() {
@@ -10,8 +11,16 @@ export class Aplication {
     this.port = process.env.PORT;
     this.usuariosPath = '/api/users';
     this.app = express();
+
+    this.conectarDB();
+    
     this.middlewares();
     this.defineRouters();
+  }
+
+
+  async conectarDB(){
+       await dbConnection();
   }
   middlewares(){
         this.app.use(cors());
