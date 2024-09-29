@@ -1,5 +1,7 @@
 import {request, response}  from 'express';
+import bcryptjs from 'bcryptjs';
 import Usuario from '../models/users.models.js'
+
 
 
 const usersGet = (req = request, resp = response) => {
@@ -14,8 +16,19 @@ const usersGet = (req = request, resp = response) => {
 };
 const usersPost = async(req = request, resp = response) => {
 
-  const body = req.body;
-  const usuario = new Usuario(body);
+  
+
+  const {nombre, correo, password, rol} = req.body;
+  const usuario = new Usuario({nombre, correo, password, rol});
+
+  const existeEmail = await Usuario.findOne({correo});
+  if (existeEmail){
+     return resp.status(400).json({
+      msg: 'Ese correo ya está registrado',
+     });
+  }
+  const salt = bcryptjs.genSaltSync();
+  usuario.password = bcryptjs.hashSync(password, salt)
   await usuario.save();
 
   await usuario.save();
