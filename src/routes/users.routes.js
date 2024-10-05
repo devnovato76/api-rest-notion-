@@ -2,7 +2,8 @@ import { Router } from "express";
 import { check } from "express-validator";
 import { usersDelete, usersGet, usersPost, usersPut } from "../controllers/users.controllers.js";
 import  {validarCampos} from "../middlewares/validar-campos.js";
-import Role from "../models/role.models.js";
+//import Role from "../models/role.models.js";
+import { emailExiste, esRoleValido, existeUsuarioPorId } from "../helpers/db-validators.js";
 
 const router = Router();
 
@@ -16,19 +17,35 @@ router.post(
       min: 6,
     }),
     check("correo", "El correo no es válido").isEmail(),
+    check("correo").custom(emailExiste),
     // check("rol", "No es un rol válido").isIn(["ADMIN_ROLE", "USER_ROLE"]),
-    check("rol").custom( async(rol = '') => {
-       const existeRol = await Role.findOne({ rol });
-       if(!existeRol){ 
-         throw new Error(`El rol ${ rol } no está registrado en la DB`)
-       }
-    }),
+    check("rol").custom(esRoleValido),
     validarCampos,
   ],
   usersPost
 );
-router.put("/:id", usersPut);
-router.delete("/:id", usersDelete);
+router.put(
+  "/:id",
+  [
+    check("id", "No es un ID válido").isMongoId(),
+    check("id").custom(existeUsuarioPorId),
+    check("rol").custom(esRoleValido),
+
+    validarCampos,
+  ],
+  usersPut
+);
+
+
+router.delete(
+  "/:id",
+  [
+    check("id", "No es un ID válido").isMongoId(),
+    check("id").custom(existeUsuarioPorId),
+    validarCampos,
+  ],
+  usersDelete
+);
 
 
 export default router;
